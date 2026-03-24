@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>wec_dyno_logger</name>
+  <version>0.1.0</version>
+  <description>
+    Performance metrics logger for the ROS2 WEC HIL Dynamometer.
+
+    Subscribes to PTO torque and joint state topics, computes standardised
+    WEC performance metrics (average power, CWR, PAPR, tracking error, reactive
+    power fraction) over a sliding window, publishes them in real time, and
+    optionally exports to CSV for post-processing and publication.
+
+    References:
+      Ringwood, J.V. et al. (2014). IEEE Control Systems, 34(5), 30–55.
+      Penalba, M. et al. (2019). Renewable Energy, 139, 1077–1089.
+  </description>
+  <maintainer email="salhus@example.com">salhus</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

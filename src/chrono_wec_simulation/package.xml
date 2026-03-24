@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>chrono_wec_simulation</name>
+  <version>0.1.0</version>
+  <description>
+    WEC wave-body dynamics simulation node for the ROS2 HIL Dynamometer.
+
+    Implements a linearised 1-DOF heaving buoy model (Falnes, 2002) as a placeholder
+    for the full HydroChrono/SeaStack integration. The node subscribes to the physical
+    PTO torque feedback and publishes velocity/position commands to the hydro emulator
+    motor, closing the HIL loop.
+
+    The dynamics interface (WecBodyDynamics) is designed to be swapped for a
+    HydroChrono implementation without any changes to downstream nodes.
+  </description>
+  <maintainer email="salhus@example.com">salhus</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

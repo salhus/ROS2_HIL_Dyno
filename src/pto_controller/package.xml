@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>pto_controller</name>
+  <version>0.1.0</version>
+  <description>
+    Pluggable PTO control strategy framework for the ROS2 HIL Dynamometer.
+
+    Implements multiple WEC PTO control strategies (passive damping, optimal passive,
+    reactive, latching, declutching) behind a common PtoStrategyBase interface.
+    The active strategy is selected via the `strategy` ROS parameter, enabling
+    runtime comparison on the same hardware with identical wave inputs.
+
+    Reference: Ringwood, J.V. et al. (2014). IEEE Control Systems, 34(5), 30–55.
+  </description>
+  <maintainer email="salhus@example.com">salhus</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

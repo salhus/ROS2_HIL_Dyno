@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>wec_dyno_bringup</name>
+  <version>0.1.0</version>
+  <description>
+    Launch files, URDF description, and configuration for the ROS2 WEC HIL Dynamometer.
+
+    Provides two launch modes:
+      dyno_single_machine.launch.py  — all nodes on one machine (development/testing)
+      dyno_distributed.launch.py     — motor-side nodes only (two-machine HIL deployment)
+
+    Includes the two-motor URDF/Xacro, ros2_control controllers configuration,
+    and FastDDS profile for optimised cross-machine communication.
+  </description>
+  <maintainer email="salhus@example.com">salhus</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Runtime dependencies — all packages launched by this bringup package -->
+  <exec_depend>chrono_wec_simulation</exec_depend>
+  <exec_depend>pto_controller</exec_depend>
+  <exec_depend>wec_dyno_logger</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>effort_controllers</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
