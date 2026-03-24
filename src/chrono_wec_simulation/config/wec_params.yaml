@@ -1,0 +1,75 @@
+# wec_params.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+# Configuration for chrono_wec_simulation_node.
+#
+# These parameters define the linearised 1-DOF heaving buoy placeholder model
+# (Falnes, 2002). All values can be overridden at launch via --params-file or
+# ros2 param set.
+#
+# Physical model:
+#   m_total · ẍ = F̂_exc·sin(ω·t) − B_rad·ẋ − K_hs·x + τ_pto
+#
+# Defaults represent a mid-scale point absorber WEC (similar to a 1:10 scale
+# Wavestar device), suitable for laboratory motor bench testing at the power
+# levels achievable with ODrive-driven motors.
+#
+# References:
+#   Falnes, J. (2002). Ocean Waves and Oscillating Systems. Cambridge University Press.
+#   Evans, D.V. (1976). J. Fluid Mechanics, 77(1), 1–25.
+# ─────────────────────────────────────────────────────────────────────────────
+
+chrono_wec_simulation_node:
+  ros__parameters:
+
+    # ── Solver rates ────────────────────────────────────────────────────────
+
+    # Integration rate for the RK4 dynamics solver [Hz].
+    # Higher rates improve accuracy but increase CPU load.
+    # 1000 Hz gives <0.1% error for wave periods > 2 s (ω < π rad/s).
+    simulation_rate_hz: 1000.0
+
+    # Output publish rate [Hz]. Decimated from simulation_rate_hz.
+    # The motor controller (hydro_motor_ctrl) needs setpoints at ≥ 2× its bandwidth.
+    # At 100 Hz, the Nyquist frequency is 50 Hz — well above the wave frequencies of
+    # interest (0.1–2 Hz for ocean waves).
+    publish_rate_hz: 100.0
+
+    # ── Body physical parameters ─────────────────────────────────────────────
+
+    # Float body mass m [kg]. Excludes added mass.
+    # Represents the dry mass of the WEC buoy.
+    body_mass_kg: 1000.0
+
+    # Added mass at infinite frequency m_∞ [kg].
+    # Falnes (2002): m_total = m + m_∞. For a hemisphere of radius R in heave:
+    # m_∞ ≈ (2/3)·π·ρ·R³. Typical ratio m_∞/m ≈ 0.3–0.7 for heaving buoys.
+    added_mass_inf_kg: 500.0
+
+    # Radiation damping coefficient B_rad [N·s/m].
+    # At resonance, the optimal passive damping equals B_rad (Evans, 1976).
+    # Determines the bandwidth of the optimal passive control strategy.
+    radiation_damping_ns_m: 200.0
+
+    # Hydrostatic restoring stiffness K_hs [N/m].
+    # For a vertical cylinder of waterplane area A_wp: K_hs = ρ·g·A_wp.
+    # Example: cylinder r=0.5 m → A_wp = π·0.25 m² → K_hs ≈ 1025·9.81·0.785 ≈ 7890 N/m.
+    # Set lower here for a flatter device (e.g., truncated sphere).
+    hydrostatic_stiffness_n_m: 3000.0
+
+    # ── Wave and excitation parameters ───────────────────────────────────────
+
+    # Excitation force amplitude F̂_exc [N].
+    # For small-amplitude waves: F̂_exc = |X(ω)|·A where X is the excitation coefficient
+    # and A = H/2 is the wave amplitude. The value 500 N corresponds to a mid-scale
+    # device at H = 1 m and a moderate excitation coefficient.
+    excitation_force_amplitude_n: 500.0
+
+    # Wave angular frequency ω [rad/s]. T_wave = 2π/ω.
+    # Default 1.0 rad/s → T = 6.28 s. Typical ocean swell: ω ≈ 0.5–2.0 rad/s.
+    # Resonance condition: ω_n = sqrt(K_hs / m_total) → ω_n = sqrt(3000/1500) ≈ 1.41 rad/s.
+    wave_omega_rad_s: 1.0
+
+    # Wave height H [m] (peak-to-trough). Used to compute η(t) = H/2 · sin(ω·t).
+    # This affects the logger's wave power calculation:
+    #   P_wave = (1/8)·ρ·g²·H²·T/(4π) per unit crest width [W/m].
+    wave_height_m: 1.0

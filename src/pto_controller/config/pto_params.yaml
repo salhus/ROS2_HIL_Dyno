@@ -1,0 +1,105 @@
+# pto_params.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+# Configuration for pto_controller_node.
+#
+# The `strategy` parameter selects the active PTO control law. All strategy-
+# specific parameters are declared below; unused parameters are ignored by
+# the selected strategy.
+#
+# Available strategies:
+#   passive_damping  — τ = -B·ω                        (Falnes, 2002)
+#   optimal_passive  — τ = -B_opt·ω, B_opt from model  (Evans, 1976)
+#   reactive         — τ = -B·ω - K·x                  (Salter, 1974)
+#   latching         — phase control via shaft locking  (Babarit & Clément, 2006)
+#   declutching      — phase control via shaft freeing  (Babarit et al., 2009)
+#
+# References:
+#   Evans, D.V. (1976). J. Fluid Mechanics, 77(1), 1–25.
+#   Falnes, J. (2002). Ocean Waves and Oscillating Systems.
+#   Babarit, A., & Clément, A.H. (2006). Applied Ocean Research, 28(2), 77–91.
+#   Babarit, A. et al. (2009). Ocean Engineering, 36(12–13), 1015–1024.
+# ─────────────────────────────────────────────────────────────────────────────
+
+pto_controller_node:
+  ros__parameters:
+
+    # ── Strategy selection ──────────────────────────────────────────────────
+    # Select the active PTO control strategy.
+    # Change at launch; runtime change requires node restart (strategy has internal state).
+    strategy: "passive_damping"
+
+    # ── ROS interface ───────────────────────────────────────────────────────
+
+    # Name of the PTO joint in /joint_states.
+    # Must match the joint name in dyno.urdf.xacro and controllers.yaml.
+    joint_name: "pto_joint"
+
+    # Control loop rate [Hz]. Must be <= controller_manager update_rate in controllers.yaml.
+    # Higher rates improve tracking of high-frequency torque commands but increase CPU load.
+    rate_hz: 100.0
+
+    # Maximum torque command [N·m]. Protects the ODrive and drivetrain from overload.
+    # Set to the ODrive torque limit × gear ratio × safety factor.
+    # Default 100 N·m is conservative for a 24V ODrive; increase for higher-voltage setup.
+    torque_limit_nm: 100.0
+
+    # ── Passive damping parameters ──────────────────────────────────────────
+    # Used by: passive_damping, reactive, latching (free phase)
+
+    # Damping coefficient B [N·m·s/rad].
+    # Optimal passive: B_opt = sqrt(B_rad² + (ω·m_total - K_hs/ω)²).
+    # For the default wave (ω=1 rad/s, m_total=1500 kg, K_hs=3000 N/m):
+    #   B_opt = sqrt(200² + (1·1500 - 3000/1)²) ≈ sqrt(40000 + 2250000) ≈ 1519 N·m·s/rad
+    # Start with B = B_rad (200) and tune upward.
+    damping_coefficient_b: 200.0
+
+    # ── Reactive control parameters ─────────────────────────────────────────
+    # Used by: reactive
+
+    # Spring coefficient K [N·m/rad].
+    # Optimal: K_opt = K_hs - ω²·m_total = 3000 - 1·1500 = 1500 N·m/rad (at ω=1 rad/s).
+    # Negative K means the PTO adds energy to the shaft (reactive/motoring mode).
+    # WARNING: Large |K| → large reactive power fraction → high ODrive current. Monitor carefully.
+    spring_k: 0.0
+
+    # ── Optimal passive parameters ──────────────────────────────────────────
+    # Used by: optimal_passive
+    # These should match the WEC model parameters in wec_params.yaml.
+
+    radiation_damping: 200.0      # B_rad [N·m·s/rad]
+    body_mass_kg: 1000.0          # m [kg]
+    added_mass_kg: 500.0          # m_∞ [kg]
+    hydrostatic_stiffness: 3000.0 # K_hs [N/m]
+    wave_omega: 1.0               # ω [rad/s]
+
+    # ── Latching control parameters ─────────────────────────────────────────
+    # Used by: latching
+
+    # Velocity threshold to trigger latching [rad/s].
+    # Trigger when |ω| < this value (near zero-crossing).
+    latch_velocity_threshold: 0.05
+
+    # Time to hold the shaft locked before releasing [s].
+    # For regular waves at ω=1 rad/s (T=6.28 s): optimal ≈ T/4 = 1.57 s.
+    # Tune empirically on the bench by maximising average power.
+    unlatch_delay_s: 0.5
+
+    # Maximum holding torque [N·m]. Must exceed peak wave torque on the shaft.
+    # If too low, the shaft slips through the latch. Start at 2× the peak passive torque.
+    max_latch_torque: 500.0
+
+    # ── Declutching control parameters ──────────────────────────────────────
+    # Used by: declutching
+
+    # Position threshold to trigger damper engagement [rad or m].
+    # Engage when |x| >= this value (near displacement extremes).
+    # Tune to ≈ 50-70% of peak position amplitude.
+    engage_position_threshold: 0.1
+
+    # Duration to keep the damper engaged [s].
+    # For regular waves at ω=1 rad/s: optimal ≈ T/4 = 1.57 s.
+    engage_duration_s: 0.3
+
+    # Damping applied during the engaged phase [N·m·s/rad].
+    # Can be set to B_opt for maximum power during the engaged window.
+    damping_when_engaged: 300.0

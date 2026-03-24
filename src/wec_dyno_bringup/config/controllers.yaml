@@ -1,0 +1,57 @@
+# controllers.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+# ros2_control controller configuration for the WEC HIL Dynamometer.
+#
+# This file configures the controller_manager and two effort controllers:
+#   - hydro_effort_controller: commands Motor 0 (hydro emulator, axis0)
+#   - pto_effort_controller:   commands Motor 1 (PTO machine,    axis1)
+#
+# Update rate (200 Hz):
+#   Chosen to be ≥ 2× the maximum control rate (100 Hz) and ≥ 2× the maximum
+#   wave frequency of interest (< 10 Hz) for adequate Nyquist margin.
+#   The ODrive CAN interface can sustain this rate at 1 Mbit/s.
+#
+# Effort controllers:
+#   JointGroupEffortController passes through the commanded torque directly
+#   to the hardware command interface without any additional feedback loop.
+#   This is appropriate because:
+#     a) The hydro motor velocity loop runs in the hydro_motor_ctrl node (higher
+#        level), not in ros2_control.
+#     b) The PTO motor torque control is performed by the ODrive's internal
+#        current controller (bandwidth ~1 kHz), which is faster than any
+#        position/velocity loop we could run in ros2_control.
+#
+# Reference:
+#   ros2_control effort_controllers: https://control.ros.org/jazzy/
+# ─────────────────────────────────────────────────────────────────────────────
+
+controller_manager:
+  ros__parameters:
+    update_rate: 200  # Hz — controller_manager update frequency
+
+    # Declare all controllers to be loaded at startup.
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    hydro_effort_controller:
+      type: effort_controllers/JointGroupEffortController
+
+    pto_effort_controller:
+      type: effort_controllers/JointGroupEffortController
+
+# ── hydro_effort_controller ────────────────────────────────────────────────
+# Commands Motor 0 (hydro emulator).
+# The command comes from the hydro velocity tracking controller (chrono_wec_simulation
+# node + a separate PID layer, or directly via /hydro_effort_controller/commands).
+hydro_effort_controller:
+  ros__parameters:
+    joints:
+      - hydro_joint
+
+# ── pto_effort_controller ──────────────────────────────────────────────────
+# Commands Motor 1 (PTO machine).
+# The command comes from pto_controller_node → /pto_effort_controller/commands.
+pto_effort_controller:
+  ros__parameters:
+    joints:
+      - pto_joint

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  dds_profile.xml
+  ═══════════════════════════════════════════════════════════════════════════════
+  FastDDS QoS profile for cross-machine WEC HIL Dynamometer deployment.
+
+  Purpose:
+    Optimised for a two-machine gigabit Ethernet HIL setup where the Simulation PC
+    (running chrono_wec_simulation + wec_dyno_logger) communicates with the Motor
+    Control PC (running pto_controller + ros2_control) over a dedicated 1 Gbit/s
+    Ethernet link.
+
+  Key design decisions:
+
+  1. UDP unicast transport (no multicast):
+     In a dedicated two-machine link, multicast is unnecessary and introduces
+     multicast storm risk. Unicast with explicit peer discovery is more reliable.
+     Set peer addresses to match your static IP configuration (see README.md §10).
+
+  2. Socket buffer sizes (8 MB):
+     The default OS socket buffers (typically 212 kB) are too small for sustained
+     1 kHz Float64 streams. 8 MB provides ~8 s of buffer headroom at 1 Mbit/s,
+     preventing drops during brief OS scheduling latency spikes.
+     Enable with: sudo sysctl -w net.core.rmem_max=8388608
+                  sudo sysctl -w net.core.wmem_max=8388608
+
+  3. Heartbeat period (10 ms):
+     Fast heartbeat ensures the subscriber detects publisher loss within 10 ms —
+     important for HIL safety (if Chrono goes silent, the motor controller should
+     know quickly and revert to zero torque).
+
+  4. Initial announcements burst:
+     Burst of 5 announcements at 20 ms intervals accelerates participant discovery
+     across the machine boundary (avoids the default 250 ms discovery delay).
+
+  Usage:
+    export FASTRTPS_DEFAULT_PROFILES_FILE=/path/to/dds_profile.xml
+    export ROS_DOMAIN_ID=42  # Same on both machines
+
+  References:
+    FastDDS documentation: https://fast-dds.docs.eprosima.com/
+    ROS 2 DDS tuning: https://docs.ros.org/en/jazzy/Concepts/About-Quality-of-Service-Settings.html
+  ═══════════════════════════════════════════════════════════════════════════════
+-->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       Transport: UDP unicast on the dedicated HIL Ethernet interface.
+       Replace 192.168.100.1 and 192.168.100.2 with your actual static IPs.
+  ═══════════════════════════════════════════════════════════════════════ -->
+  <transport_descriptors>
+    <transport_descriptor>
+      <transport_id>HilUdpTransport</transport_id>
+      <type>UDPv4</type>
+      <!-- Send socket buffer: 8 MB (requires OS sysctl tuning — see header) -->
+      <sendBufferSize>8388608</sendBufferSize>
+      <!-- Receive socket buffer: 8 MB -->
+      <receiveBufferSize>8388608</receiveBufferSize>
+    </transport_descriptor>
+  </transport_descriptors>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       Default participant profile — applies to all ROS 2 nodes in this
+       process that do not specify an explicit profile name.
+  ═══════════════════════════════════════════════════════════════════════ -->
+  <participant profile_name="default_participant" is_default_profile="true">
+    <rtps>
+      <!-- Use only our custom UDP transport (disable shared memory + default UDP) -->
+      <useBuiltinTransports>false</useBuiltinTransports>
+      <userTransports>
+        <transport_id>HilUdpTransport</transport_id>
+      </userTransports>
+
+      <!-- ── Participant discovery configuration ───────────────────────── -->
+      <builtin>
+        <!-- Use SIMPLE discovery (not SERVER) for the two-machine setup.
+             Add explicit peer addresses to enable unicast discovery without
+             multicast. Replace with the IP of the other machine. -->
+        <discovery_config>
+          <discoveryProtocol>SIMPLE</discoveryProtocol>
+          <initialAnnouncements>
+            <!-- Burst 5 announcements at startup to accelerate cross-machine discovery -->
+            <count>5</count>
+            <period>
+              <nanoseconds>20000000</nanoseconds>  <!-- 20 ms between bursts -->
+            </period>
+          </initialAnnouncements>
+        </discovery_config>
+
+        <!-- Explicit peer addresses for unicast discovery.
+             Replace with actual IPs of your Simulation PC and Motor PC. -->
+        <metatrafficUnicastLocatorList>
+          <locator>
+            <udpv4>
+              <!-- Motor Control PC IP (adjust as needed) -->
+              <address>192.168.100.2</address>
+            </udpv4>
+          </locator>
+          <locator>
+            <udpv4>
+              <!-- Simulation PC IP (adjust as needed) -->
+              <address>192.168.100.1</address>
+            </udpv4>
+          </locator>
+        </metatrafficUnicastLocatorList>
+      </builtin>
+
+      <!-- ── RTPS heartbeat tuning ────────────────────────────────────── -->
+      <!-- Heartbeat period: how often the writer sends heartbeats to readers.
+           10 ms (100 Hz) ensures fast detection of writer failure. -->
+      <throughputController>
+        <bytesPerPeriod>2097152</bytesPerPeriod>   <!-- 2 MB per period -->
+        <periodMillisecs>10</periodMillisecs>        <!-- 10 ms period = 200 MB/s cap -->
+      </throughputController>
+    </rtps>
+  </participant>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       Publisher profile: Best-effort for high-rate sensor data
+       (velocity_command, wave_elevation, body_position — 100 Hz Float64).
+       Best-effort minimises latency; occasional drops are tolerable as the
+       dynamics evolve smoothly between samples.
+  ═══════════════════════════════════════════════════════════════════════ -->
+  <publisher profile_name="sensor_data_pub">
+    <qos>
+      <reliability>
+        <kind>BEST_EFFORT</kind>
+      </reliability>
+      <durability>
+        <kind>VOLATILE</kind>
+      </durability>
+      <publishMode>
+        <kind>ASYNCHRONOUS</kind>
+      </publishMode>
+    </qos>
+    <historyMemoryPolicy>PREALLOCATED_WITH_REALLOC</historyMemoryPolicy>
+  </publisher>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       Publisher profile: Reliable for command topics
+       (/pto/measured_torque — the HIL feedback signal).
+       Reliability ensures the Chrono model always receives the latest
+       measured torque, even if a packet is dropped on the Ethernet link.
+  ═══════════════════════════════════════════════════════════════════════ -->
+  <publisher profile_name="command_pub">
+    <qos>
+      <reliability>
+        <kind>RELIABLE</kind>
+      </reliability>
+      <durability>
+        <kind>VOLATILE</kind>
+      </durability>
+    </qos>
+  </publisher>
+
+</profiles>
