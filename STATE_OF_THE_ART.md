@@ -16,8 +16,8 @@ These are all **closed-source, proprietary, and expensive** (dSPACE/Speedgoat li
 ### Tier 2 — Simulation-Only Control Comparisons
 
 - **Ringwood et al. (2014)** — comprehensive survey, but entirely numerical
-- **Penalba &amp; Ringwood (2019)** — wave-to-wire modeling, simulation only
-- **Most MPC papers** (Cretel, Li &amp; Belmont, etc.) — validate in MATLAB, never on hardware
+- **Penalba & Ringwood (2019)** — wave-to-wire modeling, simulation only
+- **Most MPC papers** (Cretel, Li & Belmont, etc.) — validate in MATLAB, never on hardware
 
 These are valuable theory contributions but they cannot capture the real-world effects that matter for PTO design: friction, cogging, bandwidth limits, communication delays.
 
@@ -140,16 +140,16 @@ Phase 1 is scaffolding. Phase 2 — this repository — is the research contribu
 
 ## References
 
-- Bacelli, G., Coe, R.G., Patterson, D., &amp; Wilson, D. (2017). System identification of a wave energy converter. *Proc. 12th European Wave and Tidal Energy Conference (EWTEC)*.
-- Babarit, A. &amp; Clément, A.H. (2006). Optimal latching control of a wave energy device in regular and irregular waves. *Applied Ocean Research*, 28(2), 77–91.
-- Babarit, A., Guglielmi, M., &amp; Clément, A.H. (2009). Declutching control of a wave energy converter. *Ocean Engineering*, 36(12–13), 1015–1024.
-- Cretel, J.A.M., Lightbody, G., Thomas, G.P., &amp; Lewis, A.W. (2011). Maximisation of energy capture by a wave-energy point absorber using model predictive control. *Proc. 18th IFAC World Congress*.
+- Bacelli, G., Coe, R.G., Patterson, D., & Wilson, D. (2017). System identification of a wave energy converter. *Proc. 12th European Wave and Tidal Energy Conference (EWTEC)*.
+- Babarit, A. & Clément, A.H. (2006). Optimal latching control of a wave energy device in regular and irregular waves. *Applied Ocean Research*, 28(2), 77–91.
+- Babarit, A., Guglielmi, M., & Clément, A.H. (2009). Declutching control of a wave energy converter. *Ocean Engineering*, 36(12–13), 1015–1024.
+- Cretel, J.A.M., Lightbody, G., Thomas, G.P., & Lewis, A.W. (2011). Maximisation of energy capture by a wave-energy point absorber using model predictive control. *Proc. 18th IFAC World Congress*.
 - Evans, D.V. (1976). A theory for wave-power absorption by oscillating bodies. *Journal of Fluid Mechanics*, 77(1), 1–25.
 - Falnes, J. (2002). *Ocean Waves and Oscillating Systems: Linear Interactions Including Wave-Energy Extraction*. Cambridge University Press.
-- Forehand, D.I.M., Kiprakis, A.E., Nambiar, A.J., &amp; Wallace, A.R. (2016). A fully coupled wave-to-wire model of an array of wave energy converters. *IEEE Transactions on Sustainable Energy*, 7(1), 118–128.
-- Garrido, A.J., Garrido, I., Amundarain, M., Alberdi, M., &amp; De la Sen, M. (2015). Sliding-mode control of wave power generation plants. *IEEE Transactions on Industry Applications*, 48(6), 2372–2381.
-- Li, G. &amp; Belmont, M.R. (2014). Model predictive control of sea wave energy converters — Part I: A convex approach for the case of a single device. *Renewable Energy*, 69, 453–463.
-- Penalba, M., Sell, N.P., Ringwood, J.V., &amp; Hillis, A.J. (2019). Validating a wave-to-wire model for a wave energy converter — Part I: The hydraulic transmission system. *Renewable Energy*, 139, 1077–1089.
-- Penalba, M. &amp; Ringwood, J.V. (2019). A review of wave-to-wire models for wave energy converters. *Energies*, 9(7), 506.
-- Ringwood, J.V., Bacelli, G., &amp; Fusco, F. (2014). Energy-maximizing control of wave-energy converters: The development of control system technology to optimize their operation. *IEEE Control Systems Magazine*, 34(5), 30–55.
-- Têtu, A., Ferri, F., Kramer, M.B., &amp; Todalshaug, J.H. (2018). Physical and mathematical modeling of a wave energy converter equipped with a negative spring mechanism for phase control. *Energies*, 11(10), 2595.
+- Forehand, D.I.M., Kiprakis, A.E., Nambiar, A.J., & Wallace, A.R. (2016). A fully coupled wave-to-wire model of an array of wave energy converters. *IEEE Transactions on Sustainable Energy*, 7(1), 118–128.
+- Garrido, A.J., Garrido, I., Amundarain, M., Alberdi, M., & De la Sen, M. (2015). Sliding-mode control of wave power generation plants. *IEEE Transactions on Industry Applications*, 48(6), 2372–2381.
+- Li, G. & Belmont, M.R. (2014). Model predictive control of sea wave energy converters — Part I: A convex approach for the case of a single device. *Renewable Energy*, 69, 453–463.
+- Penalba, M., Sell, N.P., Ringwood, J.V., & Hillis, A.J. (2019). Validating a wave-to-wire model for a wave energy converter — Part I: The hydraulic transmission system. *Renewable Energy*, 139, 1077–1089.
+- Penalba, M. & Ringwood, J.V. (2019). A review of wave-to-wire models for wave energy converters. *Energies*, 9(7), 506.
+- Ringwood, J.V., Bacelli, G., & Fusco, F. (2014). Energy-maximizing control of wave-energy converters: The development of control system technology to optimize their operation. *IEEE Control Systems Magazine*, 34(5), 30–55.
+- Têtu, A., Ferri, F., Kramer, M.B., & Todalshaug, J.H. (2018). Physical and mathematical modeling of a wave energy converter equipped with a negative spring mechanism for phase control. *Energies*, 11(10), 2595.
